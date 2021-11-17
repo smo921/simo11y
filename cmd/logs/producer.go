@@ -16,12 +16,12 @@ var randFn = func(limit int) int {
 }
 
 func producer(done chan string, numMessages int, messages <-chan map[string]interface{}) <-chan string {
-	var count int
 	out := make(chan string)
 	go func() {
 		defer close(out)
-		start := time.Now()
+		var count int
 		sleepTime := 1
+		start := time.Now()
 		for {
 			count++
 
@@ -32,6 +32,7 @@ func producer(done chan string, numMessages int, messages <-chan map[string]inte
 				diff := time.Now().Sub(start).Seconds()
 				out <- fmt.Sprintf("(%f sec): %v", diff, <-messages)
 			}
+
 			if count == numMessages {
 				out <- fmt.Sprint("producer finished")
 				return
