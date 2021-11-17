@@ -1,7 +1,7 @@
-package logs
+package generator
 
 import "fmt"
-import "ar/internal/logs/rand"
+import "ar/internal/generator/rand"
 
 func newLog() map[string]interface{} {
 	// create a json like message with a random number of top level and nested attributes

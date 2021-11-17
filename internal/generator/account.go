@@ -1,9 +1,9 @@
-package logs
+package generator
 
 import (
 	"fmt"
 
-	"ar/internal/logs/rand"
+	"ar/internal/generator/rand"
 )
 
 type account struct {
