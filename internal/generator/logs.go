@@ -19,3 +19,22 @@ func newLog() map[string]interface{} {
 	}
 	return message
 }
+
+func LogMessages(done chan string) <-chan map[string]interface{} {
+	accounts := NewAccountLogger(3)
+	fmt.Println(accounts.Dump())
+
+	out := make(chan map[string]interface{})
+	go func() {
+		defer close(out)
+		for {
+			select {
+			case <-done:
+				return
+			default:
+			}
+			out <- accounts.RandomLog()
+		}
+	}()
+	return out
+}

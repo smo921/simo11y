@@ -1,11 +1,10 @@
-package main
+package producer
 
 import (
 	"fmt"
 	"time"
 
-	"ar/internal/logs"
-	"ar/internal/logs/rand"
+	"ar/internal/generator/rand"
 )
 
 var randFn = func(limit int) int {
@@ -15,7 +14,7 @@ var randFn = func(limit int) int {
 	return (rand.SeededRand.Int() % limit)
 }
 
-func producer(done chan string, numMessages int, messages <-chan map[string]interface{}) <-chan string {
+func Logs(done chan string, numMessages int, messages <-chan map[string]interface{}) <-chan string {
 	out := make(chan string)
 	go func() {
 		defer close(out)
@@ -41,25 +40,6 @@ func producer(done chan string, numMessages int, messages <-chan map[string]inte
 			if randFn(100) < -1 { // slow message rate disabled
 				sleepTime += 20
 			}
-		}
-	}()
-	return out
-}
-
-func messages(done chan string) <-chan map[string]interface{} {
-	accounts := logs.NewAccountLogger(3)
-	fmt.Println(accounts.Dump())
-
-	out := make(chan map[string]interface{})
-	go func() {
-		defer close(out)
-		for {
-			select {
-			case <-done:
-				return
-			default:
-			}
-			out <- accounts.RandomLog()
 		}
 	}()
 	return out
