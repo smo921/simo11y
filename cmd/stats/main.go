@@ -10,7 +10,6 @@ import (
 	"github.com/DataDog/datadog-go/v5/statsd"
 
 	"ar/internal/generator"
-	"ar/internal/generator/rand"
 )
 
 const maxBufferSize = 1024
@@ -34,7 +33,7 @@ func main() {
 				return
 			default:
 			}
-			statsd.Incr(metrics.RandomMetric(), randomTags(), float64(rand.SeededRand.Int()%10+1))
+			metrics.SendRandomMetric(statsd)
 			time.Sleep(100 * time.Millisecond)
 		}
 	}()
@@ -43,10 +42,6 @@ func main() {
 	case <-done:
 		fmt.Println("All Done.")
 	}
-}
-
-type metric struct {
-	name, value, tags, _type string
 }
 
 func openPort(addr string) (*net.UDPAddr, error) {
@@ -69,8 +64,8 @@ func listen(addr string) (*net.UDPConn, error) {
 	return net.ListenUDP("udp", port)
 }
 
-func reader(done chan string) <-chan metric {
-	metricStream := make(chan metric)
+func reader(done chan string) <-chan generator.Metric {
+	metricStream := make(chan generator.Metric)
 	go func() {
 		defer close(metricStream)
 
@@ -99,7 +94,7 @@ func reader(done chan string) <-chan metric {
 
 				buffer = make([]byte, maxBufferSize)
 				for _, line := range lines {
-					metricStream <- newMetric(line)
+					metricStream <- generator.NewMetric(line)
 				}
 			}
 		}
@@ -108,7 +103,7 @@ func reader(done chan string) <-chan metric {
 	return metricStream
 }
 
-func forwarder(done chan string, metricStream <-chan metric) {
+func forwarder(done chan string, metricStream <-chan generator.Metric) {
 	out, err := dial("127.0.0.1:23456")
 	if err != nil {
 		log.Fatal(err)
@@ -122,7 +117,7 @@ func forwarder(done chan string, metricStream <-chan metric) {
 			case <-done:
 				return
 			default:
-				m := (<-metricStream).toByteSlice()
+				m := (<-metricStream).ToByteSlice()
 				_, err := out.Write(m)
 				if err != nil {
 					fmt.Println("Error", err)
@@ -131,27 +126,4 @@ func forwarder(done chan string, metricStream <-chan metric) {
 			}
 		}
 	}()
-}
-
-func newMetric(input string) metric {
-	m := metric{}
-	parts := strings.Split(input, "|")
-	metricInfo := strings.Split(parts[0], ":")
-	m.name = metricInfo[0]
-	m.value = metricInfo[1]
-	m._type = parts[1]
-	m.tags = parts[2]
-	return m
-}
-
-func (m metric) toByteSlice() []byte {
-	str := fmt.Sprintf("%s:%s|%s|%s\n", m.name, m.value, m._type, m.tags)
-	return []byte(str)
-}
-
-func randomTags() []string {
-	t := []string{"env:local"}
-	t = append(t, fmt.Sprintf("account:%d", rand.SeededRand.Int()%10000))
-	t = append(t, "instance:"+rand.String(10, rand.CharsetLower))
-	return t
 }
