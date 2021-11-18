@@ -3,7 +3,9 @@ package generator
 import (
 	"ar/internal/generator/rand"
 	"fmt"
+	"log"
 	"strings"
+	"time"
 
 	"github.com/DataDog/datadog-go/v5/statsd"
 )
@@ -17,8 +19,30 @@ type metricDefinition struct {
 	name, _type string
 }
 
-type MetricFactory struct {
+type metricFactory struct {
 	metrics []metricDefinition
+}
+
+func MetricStream(done chan string) {
+	go func() {
+		defer close(done)
+
+		statsd, err := statsd.New("127.0.0.1:12345")
+		if err != nil {
+			log.Fatal(err)
+		}
+
+		metrics := newMetricFactory(5, statsd)
+		for {
+			select {
+			case <-done:
+				return
+			default:
+			}
+			metrics.SendRandomMetric(statsd)
+			time.Sleep(100 * time.Millisecond)
+		}
+	}()
 }
 
 func NewMetric(input string) Metric {
@@ -32,8 +56,8 @@ func NewMetric(input string) Metric {
 	return m
 }
 
-func NewMetricFactory(num int, client *statsd.Client) *MetricFactory {
-	mf := &MetricFactory{
+func newMetricFactory(num int, client *statsd.Client) *metricFactory {
+	mf := &metricFactory{
 		metrics: make([]metricDefinition, num),
 	}
 	for x := range mf.metrics {
@@ -46,12 +70,12 @@ func NewMetricFactory(num int, client *statsd.Client) *MetricFactory {
 }
 
 // SendRandomMetric to statsd
-func (mf *MetricFactory) SendRandomMetric(stats *statsd.Client) error {
+func (mf *metricFactory) SendRandomMetric(stats *statsd.Client) error {
 	var err error
 	floatVal := func() float64 { return float64(rand.SeededRand.Int()%10 + 1) }
 
 	def := mf.metrics[rand.SeededRand.Int()%len(mf.metrics)]
-	tags := RandomTags()
+	tags := randomTags()
 
 	switch def._type {
 	case "c": // count
@@ -70,17 +94,6 @@ func (mf *MetricFactory) SendRandomMetric(stats *statsd.Client) error {
 		err = fmt.Errorf("Unknown metric type: '%s'", def._type)
 	}
 	return err
-}
-
-func metricFromDefinition(md metricDefinition) Metric {
-	m := Metric{}
-	m.Name = md.name
-	m._type = md._type
-	m.Tags = RandomTags()
-
-	// metric type symbols: https://github.com/DataDog/datadog-go/blob/master/statsd/format.go#L8-L16
-
-	return m
 }
 
 func randomType() string {

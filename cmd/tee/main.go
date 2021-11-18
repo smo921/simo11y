@@ -3,12 +3,11 @@ package main
 import "fmt"
 
 import "ar/internal/generator"
-import "ar/internal/producer"
 
 func main() {
 	fmt.Println("Starting")
 	done := make(chan string)
-	source := producer.Logs(done, 5, generator.LogMessages(done))
+	source := generator.LogStream(done, 5, generator.LogMessages(done))
 	ch1, ch2 := tee(done, source)
 	consumer1(done, ch1)
 	consumer2(done, ch2)

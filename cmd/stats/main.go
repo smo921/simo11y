@@ -5,9 +5,6 @@ import (
 	"log"
 	"net"
 	"strings"
-	"time"
-
-	"github.com/DataDog/datadog-go/v5/statsd"
 
 	"ar/internal/generator"
 )
@@ -17,26 +14,7 @@ const maxBufferSize = 1024
 func main() {
 	done := make(chan string)
 	forwarder(done, reader(done))
-
-	go func() {
-		defer close(done)
-
-		statsd, err := statsd.New("127.0.0.1:12345")
-		if err != nil {
-			log.Fatal(err)
-		}
-
-		metrics := generator.NewMetricFactory(5, statsd)
-		for {
-			select {
-			case <-done:
-				return
-			default:
-			}
-			metrics.SendRandomMetric(statsd)
-			time.Sleep(100 * time.Millisecond)
-		}
-	}()
+	generator.MetricStream(done)
 
 	select {
 	case <-done:
