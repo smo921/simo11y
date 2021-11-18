@@ -9,6 +9,7 @@ import (
 
 	"github.com/DataDog/datadog-go/v5/statsd"
 
+	"ar/internal/generator"
 	"ar/internal/generator/rand"
 )
 
@@ -25,6 +26,7 @@ func main() {
 	forwarder(done, reader(done))
 
 	go func() {
+		metrics := generator.NewMetricFactory(5, statsd)
 		defer close(done)
 		for {
 			select {
@@ -32,7 +34,7 @@ func main() {
 				return
 			default:
 			}
-			statsd.Incr("foo.bar.count", []string{"env:local", "account:1234", "instance:boo-ya"}, float64(rand.SeededRand.Int()%10+1))
+			statsd.Incr(metrics.RandomMetric(), []string{"env:local", "account:1234", "instance:boo-ya"}, float64(rand.SeededRand.Int()%10+1))
 			time.Sleep(100 * time.Millisecond)
 		}
 	}()
@@ -84,6 +86,7 @@ func reader(done chan string) <-chan metric {
 			default:
 				buffer := make([]byte, maxBufferSize)
 				n, err := in.Read(buffer)
+				// split on new line and write to channel
 				if err != nil {
 					fmt.Println("Error", err)
 					return
@@ -117,7 +120,7 @@ func forwarder(done chan string, metricStream <-chan metric) {
 					fmt.Println("Error", err)
 					return
 				}
-				fmt.Printf("Wrote %d bytes\n", n)
+				fmt.Printf("Wrote %d bytes: %s", n, m)
 			}
 		}
 	}()

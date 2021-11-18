@@ -47,6 +47,14 @@ func stringWithCharset(length int, charset string) string {
 	return string(b)
 }
 
+// MetricName generator
+func MetricName() string {
+	return fmt.Sprintf("%s.%s.%s",
+		String(SeededRand.Int()%15+5, CharsetLower),
+		String(SeededRand.Int()%15+5, CharsetLower),
+		String(SeededRand.Int()%15+5, CharsetLower))
+}
+
 // String of random characters from characterSet
 func String(length int, characterSet string) string {
 	return stringWithCharset(length, characterSet)
