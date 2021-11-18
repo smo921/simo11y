@@ -43,7 +43,7 @@ func consumer2(done chan string, in <-chan string) {
 	}()
 }
 
-func tee(done <-chan string, in <-chan string) (<-chan string, <-chan string) {
+func tee(done <-chan string, in <-chan string) (_, _ <-chan string) {
 	ch1 := make(chan string)
 	ch2 := make(chan string)
 	go func() {
