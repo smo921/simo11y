@@ -16,25 +16,25 @@ import (
 const maxBufferSize = 1024
 
 func main() {
-	statsd, err := statsd.New("127.0.0.1:12345")
-	if err != nil {
-		log.Fatal(err)
-	}
-
 	done := make(chan string)
-
 	forwarder(done, reader(done))
 
 	go func() {
-		metrics := generator.NewMetricFactory(5, statsd)
 		defer close(done)
+
+		statsd, err := statsd.New("127.0.0.1:12345")
+		if err != nil {
+			log.Fatal(err)
+		}
+
+		metrics := generator.NewMetricFactory(5, statsd)
 		for {
 			select {
 			case <-done:
 				return
 			default:
 			}
-			statsd.Incr(metrics.RandomMetric(), []string{"env:local", "account:1234", "instance:boo-ya"}, float64(rand.SeededRand.Int()%10+1))
+			statsd.Incr(metrics.RandomMetric(), randomTags(), float64(rand.SeededRand.Int()%10+1))
 			time.Sleep(100 * time.Millisecond)
 		}
 	}()
@@ -71,28 +71,36 @@ func listen(addr string) (*net.UDPConn, error) {
 
 func reader(done chan string) <-chan metric {
 	metricStream := make(chan metric)
-	in, err := listen("127.0.0.1:12345")
-	if err != nil {
-		log.Fatal(err)
-	}
 	go func() {
 		defer close(metricStream)
+
+		in, err := listen("127.0.0.1:12345")
+		if err != nil {
+			log.Fatal(err)
+		}
 		defer in.Close()
+
+		buffer := make([]byte, maxBufferSize)
 
 		for {
 			select {
 			case <-done:
 				return
 			default:
-				buffer := make([]byte, maxBufferSize)
-				n, err := in.Read(buffer)
-				// split on new line and write to channel
+				_, err := in.Read(buffer)
 				if err != nil {
 					fmt.Println("Error", err)
 					return
 				}
-				fmt.Printf("Read %d bytes: %s", n, buffer)
-				metricStream <- newMetric(string(buffer))
+
+				// split on new line and write to channel
+				i := strings.LastIndex(string(buffer), "\n")
+				lines := strings.Split(string(buffer[:i]), "\n")
+
+				buffer = make([]byte, maxBufferSize)
+				for _, line := range lines {
+					metricStream <- newMetric(line)
+				}
 			}
 		}
 
@@ -115,12 +123,11 @@ func forwarder(done chan string, metricStream <-chan metric) {
 				return
 			default:
 				m := (<-metricStream).toByteSlice()
-				n, err := out.Write(m)
+				_, err := out.Write(m)
 				if err != nil {
 					fmt.Println("Error", err)
 					return
 				}
-				fmt.Printf("Wrote %d bytes: %s", n, m)
 			}
 		}
 	}()
@@ -140,4 +147,11 @@ func newMetric(input string) metric {
 func (m metric) toByteSlice() []byte {
 	str := fmt.Sprintf("%s:%s|%s|%s\n", m.name, m.value, m._type, m.tags)
 	return []byte(str)
+}
+
+func randomTags() []string {
+	t := []string{"env:local"}
+	t = append(t, fmt.Sprintf("account:%d", rand.SeededRand.Int()%10000))
+	t = append(t, "instance:"+rand.String(10, rand.CharsetLower))
+	return t
 }
