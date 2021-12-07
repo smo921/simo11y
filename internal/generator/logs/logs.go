@@ -1,10 +1,12 @@
-package generator
+package logs
 
 import (
 	"ar/internal/generator/rand"
 	"fmt"
 	"time"
 )
+
+const numAccounts = 5
 
 var randFn = func(limit int) int {
 	if limit == 0 {
@@ -13,8 +15,33 @@ var randFn = func(limit int) int {
 	return (rand.SeededRand.Int() % limit)
 }
 
-// LogStream produces a stream of numMessages log messages
-func LogStream(done chan string, numMessages int, messages <-chan map[string]interface{}) <-chan string {
+// SteadyStream produces a steady stream of log messages at rate messages / sec
+func SteadyStream(done chan string, numMessages int, rate int, messages <-chan map[string]interface{}) <-chan string {
+	out := make(chan string)
+	go func() {
+		defer close(out)
+		var count int
+		for {
+			count++
+			select {
+			case <-done:
+				return
+			case <-time.After(1 * time.Second):
+				for i := 0; i < rate; i++ {
+					out <- fmt.Sprintf("%v", <-messages)
+				}
+				if count == numMessages {
+					out <- fmt.Sprint("producer finished")
+					return
+				}
+			}
+		}
+	}()
+	return out
+}
+
+// SlowStream produces a slow stream of numMessages log messages
+func SlowStream(done chan string, numMessages int, messages <-chan map[string]interface{}) <-chan string {
 	out := make(chan string)
 	go func() {
 		defer close(out)
@@ -63,7 +90,7 @@ func newLog() map[string]interface{} {
 }
 
 func LogMessages(done chan string) <-chan map[string]interface{} {
-	accounts := NewAccountLogger(3)
+	accounts := newAccountLogger(numAccounts)
 	fmt.Println(accounts.Dump())
 
 	out := make(chan map[string]interface{})

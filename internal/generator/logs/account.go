@@ -1,4 +1,4 @@
-package generator
+package logs
 
 import (
 	"fmt"
@@ -16,8 +16,8 @@ type AccountLogger struct {
 	accounts []account
 }
 
-// NewAccountLogger initializes random account data to be added to log messages
-func NewAccountLogger(num int) *AccountLogger {
+// newAccountLogger initializes random account data to be added to log messages
+func newAccountLogger(num int) *AccountLogger {
 	al := &AccountLogger{}
 	al.accounts = make([]account, num)
 	for x := range al.accounts {
