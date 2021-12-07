@@ -39,13 +39,16 @@ func (al AccountLogger) randomAccount() account {
 	return al.accounts[rand.SeededRand.Int()%len(al.accounts)]
 }
 
-// RandomLog message with account information embedded
-func (al AccountLogger) RandomLog() map[string]interface{} {
-	log := newLog()
+func (al AccountLogger) Decorator(msg structuredMessage) structuredMessage {
 	account := al.randomAccount()
-	log["account"] = make(map[string]interface{})
-	accountLog := log["account"].(map[string]interface{})
+	msg["account"] = make(structuredMessage)
+	accountLog := msg["account"].(structuredMessage)
 	accountLog["id"] = account.id
 	accountLog["name"] = account.name
-	return log
+	return msg
+}
+
+// RandomLog message with account information embedded
+func (al AccountLogger) RandomLog() structuredMessage {
+	return al.Decorator(newLog())
 }

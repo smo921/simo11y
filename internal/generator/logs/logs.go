@@ -7,6 +7,9 @@ import (
 )
 
 const numAccounts = 5
+const numServices = 20
+
+type structuredMessage map[string]interface{}
 
 var randFn = func(limit int) int {
 	if limit == 0 {
@@ -16,7 +19,7 @@ var randFn = func(limit int) int {
 }
 
 // SteadyStream produces a steady stream of log messages at rate messages / sec
-func SteadyStream(done chan string, numMessages int, rate int, messages <-chan map[string]interface{}) <-chan string {
+func SteadyStream(done chan string, numMessages int, rate int, messages <-chan structuredMessage) <-chan string {
 	out := make(chan string)
 	go func() {
 		defer close(out)
@@ -41,7 +44,7 @@ func SteadyStream(done chan string, numMessages int, rate int, messages <-chan m
 }
 
 // SlowStream produces a slow stream of numMessages log messages
-func SlowStream(done chan string, numMessages int, messages <-chan map[string]interface{}) <-chan string {
+func SlowStream(done chan string, numMessages int, messages <-chan structuredMessage) <-chan string {
 	out := make(chan string)
 	go func() {
 		defer close(out)
@@ -72,7 +75,7 @@ func SlowStream(done chan string, numMessages int, messages <-chan map[string]in
 	return out
 }
 
-func newLog() map[string]interface{} {
+func newLog() structuredMessage {
 	// create a json like message with a random number of top level and nested attributes
 	topLevel := rand.SeededRand.Int()%10 + 3
 	message := make(map[string]interface{})
@@ -89,11 +92,48 @@ func newLog() map[string]interface{} {
 	return message
 }
 
-func LogMessages(done chan string) <-chan map[string]interface{} {
+type decorator func(structuredMessage) structuredMessage
+type logger struct {
+	decorators []decorator
+}
+
+func newLogger(options ...func(*logger)) *logger {
+	l := &logger{
+		decorators: make([]decorator, 0),
+	}
+
+	for _, o := range options {
+		o(l)
+	}
+	return l
+}
+
+func withDecorator(d decorator) func(*logger) {
+	return func(l *logger) {
+		l.decorators = append(l.decorators, d)
+	}
+}
+
+func (l *logger) RandomLog() structuredMessage {
+	log := newLog()
+	for _, d := range l.decorators {
+		log = d(log)
+	}
+	return log
+}
+
+func LogMessages(done chan string) <-chan structuredMessage {
 	accounts := newAccountLogger(numAccounts)
 	fmt.Println(accounts.Dump())
+	services := newServiceLogger(numServices)
+	fmt.Println(services.Dump())
 
-	out := make(chan map[string]interface{})
+	l := newLogger(
+		withDecorator(accounts.Decorator),
+		withDecorator(services.Decorator),
+	)
+
+	out := make(chan structuredMessage)
 	go func() {
 		defer close(out)
 		for {
@@ -102,7 +142,7 @@ func LogMessages(done chan string) <-chan map[string]interface{} {
 				return
 			default:
 			}
-			out <- accounts.RandomLog()
+			out <- l.RandomLog()
 		}
 	}()
 	return out
