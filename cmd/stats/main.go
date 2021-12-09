@@ -14,9 +14,15 @@ const maxBufferSize = 1024
 func main() {
 	done := make(chan string)
 	defer close(done)
-	forwarder(done, reader(done))
-	<-generator.MetricStream(done)
-	fmt.Println("All Done.")
+	src := fmt.Sprintf("127.0.0.1:%d", 12345)
+	dest := fmt.Sprintf("127.0.0.1:%d", 23456)
+	forwarder(done, dest, reader(done, src))
+	r := reader(done, dest)
+
+	generator.MetricStream(done, src)
+	for m := range r {
+		fmt.Println(m)
+	}
 }
 
 func openPort(addr string) (*net.UDPAddr, error) {
@@ -39,12 +45,12 @@ func listen(addr string) (*net.UDPConn, error) {
 	return net.ListenUDP("udp", port)
 }
 
-func reader(done chan string) <-chan generator.Metric {
+func reader(done chan string, addr string) <-chan generator.Metric {
 	metricStream := make(chan generator.Metric)
 	go func() {
 		defer close(metricStream)
 
-		in, err := listen("127.0.0.1:12345")
+		in, err := listen(addr)
 		if err != nil {
 			log.Fatal(err)
 		}
@@ -78,8 +84,8 @@ func reader(done chan string) <-chan generator.Metric {
 	return metricStream
 }
 
-func forwarder(done chan string, metricStream <-chan generator.Metric) {
-	out, err := dial("127.0.0.1:23456")
+func forwarder(done chan string, addr string, metricStream <-chan generator.Metric) {
+	out, err := dial(addr)
 	if err != nil {
 		log.Fatal(err)
 	}

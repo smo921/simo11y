@@ -23,12 +23,12 @@ type metricFactory struct {
 	metrics []metricDefinition
 }
 
-func MetricStream(done chan string) <-chan string {
+func MetricStream(done chan string, addr string) <-chan string {
 	out := make(chan string)
 	go func() {
 		defer close(out)
 
-		statsd, err := statsd.New("127.0.0.1:12345")
+		statsd, err := statsd.New(addr)
 		if err != nil {
 			log.Fatal(err)
 		}
