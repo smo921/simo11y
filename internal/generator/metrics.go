@@ -23,9 +23,10 @@ type metricFactory struct {
 	metrics []metricDefinition
 }
 
-func MetricStream(done chan string) {
+func MetricStream(done chan string) <-chan string {
+	out := make(chan string)
 	go func() {
-		defer close(done)
+		defer close(out)
 
 		statsd, err := statsd.New("127.0.0.1:12345")
 		if err != nil {
@@ -43,6 +44,7 @@ func MetricStream(done chan string) {
 			time.Sleep(100 * time.Millisecond)
 		}
 	}()
+	return out
 }
 
 func NewMetric(input string) Metric {

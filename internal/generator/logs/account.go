@@ -4,6 +4,7 @@ import (
 	"fmt"
 
 	"ar/internal/generator/rand"
+	"ar/internal/types"
 )
 
 type account struct {
@@ -39,16 +40,16 @@ func (al AccountLogger) randomAccount() account {
 	return al.accounts[rand.SeededRand.Int()%len(al.accounts)]
 }
 
-func (al AccountLogger) Decorator(msg structuredMessage) structuredMessage {
+func (al AccountLogger) Decorator(msg types.StructuredMessage) types.StructuredMessage {
 	account := al.randomAccount()
-	msg["account"] = make(structuredMessage)
-	accountLog := msg["account"].(structuredMessage)
+	msg["account"] = make(types.StructuredMessage)
+	accountLog := msg["account"].(types.StructuredMessage)
 	accountLog["id"] = account.id
 	accountLog["name"] = account.name
 	return msg
 }
 
 // RandomLog message with account information embedded
-func (al AccountLogger) RandomLog() structuredMessage {
+func (al AccountLogger) RandomLog() types.StructuredMessage {
 	return al.Decorator(newLog())
 }

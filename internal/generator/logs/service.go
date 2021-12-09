@@ -1,6 +1,7 @@
 package logs
 
 import "fmt"
+import "ar/internal/types"
 import "ar/internal/generator/rand"
 
 type service struct {
@@ -33,7 +34,7 @@ func (sl ServiceLogger) Dump() string {
 	return ret
 }
 
-func (sl ServiceLogger) Decorator(msg structuredMessage) structuredMessage {
+func (sl ServiceLogger) Decorator(msg types.StructuredMessage) types.StructuredMessage {
 	service := sl.randomService()
 	msg["service"] = service.name
 	return msg

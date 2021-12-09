@@ -2,14 +2,14 @@ package logs
 
 import (
 	"ar/internal/generator/rand"
+	"ar/internal/types"
+	"encoding/json"
 	"fmt"
 	"time"
 )
 
 const numAccounts = 5
 const numServices = 20
-
-type structuredMessage map[string]interface{}
 
 var randFn = func(limit int) int {
 	if limit == 0 {
@@ -19,23 +19,17 @@ var randFn = func(limit int) int {
 }
 
 // SteadyStream produces a steady stream of log messages at rate messages / sec
-func SteadyStream(done chan string, numMessages int, rate int, messages <-chan structuredMessage) <-chan string {
+func SteadyStream(done chan string, rate int, messages <-chan string) <-chan string {
 	out := make(chan string)
 	go func() {
 		defer close(out)
-		var count int
 		for {
-			count++
 			select {
 			case <-done:
 				return
 			case <-time.After(1 * time.Second):
 				for i := 0; i < rate; i++ {
 					out <- fmt.Sprintf("%v", <-messages)
-				}
-				if count == numMessages {
-					out <- fmt.Sprint("producer finished")
-					return
 				}
 			}
 		}
@@ -44,41 +38,34 @@ func SteadyStream(done chan string, numMessages int, rate int, messages <-chan s
 }
 
 // SlowStream produces a slow stream of numMessages log messages
-func SlowStream(done chan string, numMessages int, messages <-chan structuredMessage) <-chan string {
+func SlowStream(done chan string, messages <-chan string) <-chan string {
 	out := make(chan string)
 	go func() {
 		defer close(out)
-		var count int
 		sleepTime := 1
 		start := time.Now()
-		for {
-			count++
 
+		for {
 			select {
 			case <-done:
 				return
 			case <-time.After(time.Duration(sleepTime) * time.Second):
 				diff := time.Now().Sub(start).Seconds()
 				out <- fmt.Sprintf("(%f sec): %v", diff, <-messages)
-			}
-
-			if count == numMessages {
-				out <- fmt.Sprint("producer finished")
-				return
-			}
-			sleepTime = randFn(10)
-			if randFn(100) < -1 { // slow message rate disabled
-				sleepTime += 20
+				sleepTime = randFn(10)
+				if randFn(100) < -1 { // slow message rate disabled
+					sleepTime += 20
+				}
 			}
 		}
 	}()
 	return out
 }
 
-func newLog() structuredMessage {
+func newLog() types.StructuredMessage {
 	// create a json like message with a random number of top level and nested attributes
 	topLevel := rand.SeededRand.Int()%10 + 3
-	message := make(map[string]interface{})
+	message := make(types.StructuredMessage)
 
 	for i := 0; i < topLevel; i++ {
 		key := fmt.Sprintf("topLevelAttribute_%d", i)
@@ -92,7 +79,7 @@ func newLog() structuredMessage {
 	return message
 }
 
-type decorator func(structuredMessage) structuredMessage
+type decorator func(types.StructuredMessage) types.StructuredMessage
 type logger struct {
 	decorators []decorator
 }
@@ -114,7 +101,7 @@ func withDecorator(d decorator) func(*logger) {
 	}
 }
 
-func (l *logger) RandomLog() structuredMessage {
+func (l *logger) RandomLog() types.StructuredMessage {
 	log := newLog()
 	for _, d := range l.decorators {
 		log = d(log)
@@ -122,7 +109,7 @@ func (l *logger) RandomLog() structuredMessage {
 	return log
 }
 
-func LogMessages(done chan string) <-chan structuredMessage {
+func LogMessages(done chan string) <-chan string {
 	accounts := newAccountLogger(numAccounts)
 	fmt.Println(accounts.Dump())
 	services := newServiceLogger(numServices)
@@ -133,7 +120,7 @@ func LogMessages(done chan string) <-chan structuredMessage {
 		withDecorator(services.Decorator),
 	)
 
-	out := make(chan structuredMessage)
+	out := make(chan string)
 	go func() {
 		defer close(out)
 		for {
@@ -142,7 +129,12 @@ func LogMessages(done chan string) <-chan structuredMessage {
 				return
 			default:
 			}
-			out <- l.RandomLog()
+			msg, err := json.Marshal(l.RandomLog())
+			if err != nil {
+				fmt.Println("ERROR: ", err)
+				continue
+			}
+			out <- string(msg)
 		}
 	}()
 	return out

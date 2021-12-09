@@ -13,13 +13,10 @@ const maxBufferSize = 1024
 
 func main() {
 	done := make(chan string)
+	defer close(done)
 	forwarder(done, reader(done))
-	generator.MetricStream(done)
-
-	select {
-	case <-done:
-		fmt.Println("All Done.")
-	}
+	<-generator.MetricStream(done)
+	fmt.Println("All Done.")
 }
 
 func openPort(addr string) (*net.UDPAddr, error) {
