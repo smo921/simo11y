@@ -7,6 +7,7 @@ import (
 	"strings"
 
 	"ar/internal/generator"
+	"ar/internal/types"
 )
 
 const maxBufferSize = 1024
@@ -45,8 +46,9 @@ func listen(addr string) (*net.UDPConn, error) {
 	return net.ListenUDP("udp", port)
 }
 
-func reader(done chan string, addr string) <-chan generator.Metric {
-	metricStream := make(chan generator.Metric)
+// reads metrcis from addr and sends to returned channel
+func reader(done chan string, addr string) <-chan types.Metric {
+	metricStream := make(chan types.Metric)
 	go func() {
 		defer close(metricStream)
 
@@ -75,7 +77,7 @@ func reader(done chan string, addr string) <-chan generator.Metric {
 
 				buffer = make([]byte, maxBufferSize)
 				for _, line := range lines {
-					metricStream <- generator.NewMetric(line)
+					metricStream <- types.MetricFromStatsd(line)
 				}
 			}
 		}
@@ -84,7 +86,7 @@ func reader(done chan string, addr string) <-chan generator.Metric {
 	return metricStream
 }
 
-func forwarder(done chan string, addr string, metricStream <-chan generator.Metric) {
+func forwarder(done chan string, addr string, metricStream <-chan types.Metric) {
 	out, err := dial(addr)
 	if err != nil {
 		log.Fatal(err)

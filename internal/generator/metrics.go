@@ -4,16 +4,10 @@ import (
 	"ar/internal/generator/rand"
 	"fmt"
 	"log"
-	"strings"
 	"time"
 
 	"github.com/DataDog/datadog-go/v5/statsd"
 )
-
-type Metric struct {
-	Name, Value, _type string
-	Tags               []string
-}
 
 type metricDefinition struct {
 	name, _type string
@@ -23,6 +17,7 @@ type metricFactory struct {
 	metrics []metricDefinition
 }
 
+// Generate a stream of random metrics
 func MetricStream(done chan string, addr string) <-chan string {
 	out := make(chan string)
 	go func() {
@@ -38,26 +33,15 @@ func MetricStream(done chan string, addr string) <-chan string {
 			select {
 			case <-done:
 				return
-			default:
+			case <-time.After(100 * time.Millisecond):
+				metrics.SendRandomMetric(statsd)
 			}
-			metrics.SendRandomMetric(statsd)
-			time.Sleep(100 * time.Millisecond)
 		}
 	}()
 	return out
 }
 
-func NewMetric(input string) Metric {
-	m := Metric{}
-	parts := strings.Split(input, "|")
-	metricInfo := strings.Split(parts[0], ":")
-	m.Name = metricInfo[0]
-	m.Value = metricInfo[1]
-	m._type = parts[1]
-	m.Tags = strings.Split(parts[2], ",")
-	return m
-}
-
+// newMetricFactory of num random metrics
 func newMetricFactory(num int, client *statsd.Client) *metricFactory {
 	mf := &metricFactory{
 		metrics: make([]metricDefinition, num),
@@ -71,7 +55,7 @@ func newMetricFactory(num int, client *statsd.Client) *metricFactory {
 	return mf
 }
 
-// SendRandomMetric to statsd
+// SendRandomMetric from the metric factory to statsd
 func (mf *metricFactory) SendRandomMetric(stats *statsd.Client) error {
 	var err error
 	floatVal := func() float64 { return float64(rand.SeededRand.Int()%10 + 1) }
@@ -79,6 +63,7 @@ func (mf *metricFactory) SendRandomMetric(stats *statsd.Client) error {
 	def := mf.metrics[rand.SeededRand.Int()%len(mf.metrics)]
 	tags := randomTags()
 
+	// call the correct method based on the type of metric
 	switch def._type {
 	case "c": // count
 		err = stats.Incr(def.name, tags, floatVal())
@@ -101,9 +86,4 @@ func (mf *metricFactory) SendRandomMetric(stats *statsd.Client) error {
 func randomType() string {
 	var types = []string{"c", "d", "g", "h", "s", "ms"}
 	return types[rand.SeededRand.Int()%len(types)]
-}
-
-func (m Metric) ToByteSlice() []byte {
-	str := fmt.Sprintf("%s:%s|%s|%s\n", m.Name, m.Value, m._type, strings.Join(m.Tags, ","))
-	return []byte(str)
 }
