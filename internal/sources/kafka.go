@@ -9,12 +9,8 @@ import (
 	"github.com/confluentinc/confluent-kafka-go/kafka"
 )
 
-func Kafka(done chan string) <-chan types.StructuredMessage {
+func Kafka(done chan string, broker, topic string) <-chan types.StructuredMessage {
 	out := make(chan types.StructuredMessage)
-
-	// setup kafka client
-	broker := "localhost:9092"
-	topic := "demo_topic"
 
 	consumer, err := kafka.NewConsumer(&kafka.ConfigMap{
 		"bootstrap.servers": broker,

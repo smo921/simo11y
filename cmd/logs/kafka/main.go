@@ -12,13 +12,15 @@ import (
 )
 
 const numMessages = 20
+const broker = "localhost:9092"
+const topic = "demo_topic"
 
 func main() {
 	fmt.Println("Starting")
 	done := make(chan string)
 	defer close(done)
 
-	outputs.Kafka(done, filters.Take(done, numMessages,
+	outputs.Kafka(done, broker, topic, filters.Take(done, numMessages,
 		transformers.LogHash(done, "logHash",
 			transformers.StructuredMessage(done,
 				logGenerator.SteadyStream(done, 2, logGenerator.Messages(done)),
@@ -28,7 +30,7 @@ func main() {
 
 	fmt.Println("Done sending messages to Kafka")
 
-	<-consumers.Structured(done, sources.Kafka(done))
+	<-consumers.Structured(done, sources.Kafka(done, broker, topic))
 
 	fmt.Println("All Done")
 }

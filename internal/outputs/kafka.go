@@ -12,11 +12,8 @@ import (
 type KafkaConfig struct{}
 
 // Kafka sync reads from the in channel and writes messages to the configured brokers/topics
-func Kafka(done chan string, in <-chan types.StructuredMessage) {
+func Kafka(done chan string, broker, topic string, in <-chan types.StructuredMessage) {
 	// setup kafka client
-	broker := "localhost:9092"
-	topic := "demo_topic"
-
 	p, err := kafka.NewProducer(&kafka.ConfigMap{"bootstrap.servers": broker})
 
 	if err != nil {
