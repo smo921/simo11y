@@ -60,6 +60,7 @@ func String(length int, characterSet string) string {
 	return stringWithCharset(length, characterSet)
 }
 
+// generate a string resembling a randomized valid URL
 func randomURL() string {
 	host := fmt.Sprintf("%s.%s.%s",
 		String(SeededRand.Int()%30+5, CharsetLower),

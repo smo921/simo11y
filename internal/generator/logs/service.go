@@ -8,6 +8,7 @@ type service struct {
 	name, product, team string
 }
 
+// ServiceLogger that decorates logs with service details
 type ServiceLogger struct {
 	services []service
 }
@@ -25,6 +26,7 @@ func newServiceLogger(num int) *ServiceLogger {
 	return sl
 }
 
+// Dump returns the service logger runtime details as a string
 func (sl ServiceLogger) Dump() string {
 	ret := fmt.Sprintf("Service Logger: %d services\n", len(sl.services))
 	for i := range sl.services {
@@ -34,6 +36,7 @@ func (sl ServiceLogger) Dump() string {
 	return ret
 }
 
+// Decorator adds service details to a structured message
 func (sl ServiceLogger) Decorator(msg types.StructuredMessage) types.StructuredMessage {
 	service := sl.randomService()
 	msg["service"] = service.name

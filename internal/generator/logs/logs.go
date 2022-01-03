@@ -62,8 +62,8 @@ func SlowStream(done chan string, messages <-chan string) <-chan string {
 	return out
 }
 
+// create a json like message with a random number of top level and nested attributes
 func newLog() types.StructuredMessage {
-	// create a json like message with a random number of top level and nested attributes
 	topLevel := rand.SeededRand.Int()%10 + 3
 	message := make(types.StructuredMessage)
 
@@ -101,6 +101,8 @@ func withDecorator(d decorator) func(*logger) {
 	}
 }
 
+// Random log returns a random structured message including fields added by the
+// decorators configured in the logger (`l`)
 func (l *logger) RandomLog() types.StructuredMessage {
 	log := newLog()
 	for _, d := range l.decorators {
@@ -109,6 +111,8 @@ func (l *logger) RandomLog() types.StructuredMessage {
 	return log
 }
 
+// Messages generates a continuous stream of log messages to an output channel.
+// The messages are decorated with account and service details.
 func Messages(done chan string) <-chan string {
 	accounts := newAccountLogger(numAccounts)
 	fmt.Println(accounts.Dump())

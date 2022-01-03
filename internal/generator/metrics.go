@@ -41,7 +41,8 @@ func MetricStream(done chan string, addr string) <-chan string {
 	return out
 }
 
-// newMetricFactory of num random metrics
+// newMetricFactory of num random metrics.  Guarantees that a specific number of umique metric
+// names/types will be created and returned by the metricFactory
 func newMetricFactory(num int, client *statsd.Client) *metricFactory {
 	mf := &metricFactory{
 		metrics: make([]metricDefinition, num),
@@ -83,6 +84,7 @@ func (mf *metricFactory) SendRandomMetric(stats *statsd.Client) error {
 	return err
 }
 
+// generate a random metric "type"
 func randomType() string {
 	var types = []string{"c", "d", "g", "h", "s", "ms"}
 	return types[rand.SeededRand.Int()%len(types)]

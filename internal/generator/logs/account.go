@@ -40,6 +40,7 @@ func (al AccountLogger) randomAccount() account {
 	return al.accounts[rand.SeededRand.Int()%len(al.accounts)]
 }
 
+// Decorator adds account details to a structured message
 func (al AccountLogger) Decorator(msg types.StructuredMessage) types.StructuredMessage {
 	account := al.randomAccount()
 	msg["account"] = make(types.StructuredMessage)
