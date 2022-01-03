@@ -109,7 +109,7 @@ func (l *logger) RandomLog() types.StructuredMessage {
 	return log
 }
 
-func LogMessages(done chan string) <-chan string {
+func Messages(done chan string) <-chan string {
 	accounts := newAccountLogger(numAccounts)
 	fmt.Println(accounts.Dump())
 	services := newServiceLogger(numServices)

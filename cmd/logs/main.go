@@ -3,7 +3,7 @@ package main
 import "fmt"
 
 import "ar/internal/consumers"
-import "ar/internal/generator/logs"
+import logGenerator "ar/internal/generator/logs"
 import "ar/internal/filters"
 import "ar/internal/transformers"
 
@@ -18,7 +18,7 @@ func main() {
 		filters.Take(done, numMessages,
 			transformers.LogHash(done, "logHash",
 				transformers.StructuredMessage(done,
-					logs.SteadyStream(done, 2, logs.LogMessages(done)),
+					logGenerator.SteadyStream(done, 2, logGenerator.Messages(done)),
 				),
 			),
 		),
