@@ -30,7 +30,7 @@ func main() {
 
 	fmt.Println("Done sending messages to Kafka")
 
-	<-consumers.Structured(done, sources.Kafka(done, broker, topic))
+	<-consumers.Structured(done, sources.Kafka(done, broker, topic, "demo"))
 
 	fmt.Println("All Done")
 }

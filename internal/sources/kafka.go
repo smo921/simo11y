@@ -9,12 +9,12 @@ import (
 	"github.com/confluentinc/confluent-kafka-go/kafka"
 )
 
-func Kafka(done chan string, broker, topic string) <-chan types.StructuredMessage {
+func Kafka(done chan string, broker, topic, consumerGroup string) <-chan types.StructuredMessage {
 	out := make(chan types.StructuredMessage)
 
 	consumer, err := kafka.NewConsumer(&kafka.ConfigMap{
 		"bootstrap.servers": broker,
-		"group.id":          "demo",
+		"group.id":          consumerGroup,
 		"auto.offset.reset": "beginning",
 	})
 
@@ -34,24 +34,18 @@ func Kafka(done chan string, broker, topic string) <-chan types.StructuredMessag
 			case <-done:
 				return
 			default:
-				fmt.Printf("Polling for new message on %s\n", topic)
-				ev := consumer.Poll(1000)
+				ev := consumer.Poll(0)
 				if ev == nil {
 					continue
 				}
-				fmt.Printf("Processing event: %v\n", ev)
 				switch e := ev.(type) {
 				case *kafka.Message:
 					var msg map[string]interface{}
-					fmt.Printf("%% Message on %s:\n%s\n",
-						e.TopicPartition, string(e.Value))
 					err := json.Unmarshal(e.Value, &msg)
 					if err != nil {
 						fmt.Printf("%% Error: %v\n", e)
 					}
 					out <- msg
-				case kafka.PartitionEOF:
-					fmt.Printf("%% Reached %v\n", e)
 				case kafka.Error:
 					fmt.Fprintf(os.Stderr, "%% Error: %v\n", e)
 				}
