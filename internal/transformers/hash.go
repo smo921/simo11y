@@ -9,32 +9,20 @@ import (
 )
 
 // LogHash calculates a unique hash based on the structure of a log message
-func LogHash(done chan string, dest string, in <-chan types.StructuredMessage) <-chan types.StructuredMessage {
-	out := make(chan types.StructuredMessage)
+func LogHash(m types.StructuredMessage) types.StructuredMessage {
 	identifierKeys := [...]string{"application"}
 
-	go func() {
-		defer close(out)
-		for {
-			select {
-			case <-done:
-				return
-			case msg := <-in:
-				// get message structure
-				msgStructure := messageStructure(msg)
-				hash := sha256.Sum256([]byte(fmt.Sprintf("%v", msgStructure)))
+	// get message structure
+	msgStructure := messageStructure(m)
+	hash := sha256.Sum256([]byte(fmt.Sprintf("%v", msgStructure)))
 
-				var id string
-				for _, key := range identifierKeys {
-					id += fmt.Sprintf(",%v", msg[key])
-				}
-				// return id[1:], hash
-				msg[dest] = hash
-				out <- msg
-			}
-		}
-	}()
-	return out
+	var id string
+	for _, key := range identifierKeys {
+		id += fmt.Sprintf(",%v", m[key])
+	}
+	m["logHash"] = hash
+
+	return m
 }
 
 func messageStructure(msg types.StructuredMessage) types.StructuredMessage {

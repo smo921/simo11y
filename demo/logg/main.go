@@ -31,8 +31,8 @@ func main() {
 
 	// BLOCKING: Generate random log messages and write them to kafka
 	outputs.Kafka(done, broker, topic,
-		transformers.Mutate(done, MutateRandomField,
-			transformers.LogHash(done, "logHash",
+		consumers.Processor(done, MutateRandomField,
+			consumers.Processor(done, transformers.LogHash,
 				transformers.StructuredMessage(done,
 					logGenerator.SteadyStream(done, 2, logGenerator.Messages(done)),
 				),

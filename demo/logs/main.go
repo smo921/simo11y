@@ -18,7 +18,7 @@ func main() {
 
 	<-consumers.Structured(done,
 		filters.Take(done, numMessages,
-			transformers.LogHash(done, "logHash",
+			consumers.Processor(done, transformers.LogHash,
 				transformers.StructuredMessage(done,
 					logGenerator.SteadyStream(done, 2, logGenerator.Messages(done)),
 				),

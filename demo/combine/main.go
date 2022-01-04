@@ -17,13 +17,13 @@ func main() {
 	done := make(chan string)
 	defer close(done)
 
-	source1 := transformers.Mutate(done, cb1,
+	source1 := consumers.Processor(done, cb1,
 		transformers.StructuredMessage(done,
 			logs.SteadyStream(done, 1, logs.Messages(done)),
 		),
 	)
 
-	source2 := transformers.Mutate(done, cb2,
+	source2 := consumers.Processor(done, cb2,
 		transformers.StructuredMessage(done,
 			logs.SlowStream(done, logs.Messages(done)),
 		),

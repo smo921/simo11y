@@ -1,8 +1,8 @@
-package transformers
+package consumers
 
 import "ar/internal/types"
 
-func Mutate(done chan string, cb types.Callback, in <-chan types.StructuredMessage) <-chan types.StructuredMessage {
+func Processor(done chan string, cb types.Callback, in <-chan types.StructuredMessage) <-chan types.StructuredMessage {
 	out := make(chan types.StructuredMessage)
 	go func() {
 		defer close(out)
