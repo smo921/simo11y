@@ -2,7 +2,9 @@ package transformers
 
 import "ar/internal/types"
 
-func Add(done chan string, dest string, value interface{}, in <-chan types.StructuredMessage) <-chan types.StructuredMessage {
+type Callback func(types.StructuredMessage) types.StructuredMessage
+
+func Add(done chan string, cb Callback, in <-chan types.StructuredMessage) <-chan types.StructuredMessage {
 	out := make(chan types.StructuredMessage)
 	go func() {
 		defer close(out)
@@ -11,8 +13,7 @@ func Add(done chan string, dest string, value interface{}, in <-chan types.Struc
 			case <-done:
 				return
 			case msg := <-in:
-				msg[dest] = value
-				out <- msg
+				out <- cb(msg)
 			}
 		}
 	}()
