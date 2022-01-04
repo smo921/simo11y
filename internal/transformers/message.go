@@ -1,8 +1,9 @@
 package transformers
 
 import (
-	"ar/internal/types"
 	"encoding/json"
+
+	"ar/internal/types"
 )
 
 func StructuredMessage(done chan string, in <-chan string) <-chan types.StructuredMessage {

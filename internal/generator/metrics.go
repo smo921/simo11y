@@ -1,12 +1,13 @@
 package generator
 
 import (
-	"ar/internal/generator/rand"
 	"fmt"
 	"log"
 	"time"
 
 	"github.com/DataDog/datadog-go/v5/statsd"
+
+	"ar/internal/generator/rand"
 )
 
 type metricDefinition struct {

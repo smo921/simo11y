@@ -1,11 +1,12 @@
 package outputs
 
 import (
-	"ar/internal/types"
 	"fmt"
 	"os"
 
 	"github.com/confluentinc/confluent-kafka-go/kafka"
+
+	"ar/internal/types"
 )
 
 // KafkaConfig stores configuration details

@@ -1,8 +1,10 @@
 package logs
 
-import "fmt"
-import "ar/internal/types"
-import "ar/internal/generator/rand"
+import (
+	"ar/internal/generator/rand"
+	"ar/internal/types"
+	"fmt"
+)
 
 type service struct {
 	name, product, team string

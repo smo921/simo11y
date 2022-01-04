@@ -1,12 +1,14 @@
 package main
 
-import "fmt"
+import (
+	"fmt"
 
-import "ar/internal/consumers"
-import "ar/internal/filters"
-import "ar/internal/generator/logs"
-import "ar/internal/mixers"
-import "ar/internal/transformers"
+	"ar/internal/consumers"
+	"ar/internal/filters"
+	"ar/internal/generator/logs"
+	"ar/internal/mixers"
+	"ar/internal/transformers"
+)
 
 const numMessages = 3
 
