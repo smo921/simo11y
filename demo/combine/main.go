@@ -7,6 +7,7 @@ import (
 	"ar/internal/generator/logs"
 	"ar/internal/mixers"
 	"ar/internal/transformers"
+	"ar/internal/types"
 )
 
 const numMessages = 3
@@ -16,13 +17,13 @@ func main() {
 	done := make(chan string)
 	defer close(done)
 
-	source1 := transformers.Add(done, "source", 1,
+	source1 := transformers.Add(done, cb1,
 		transformers.StructuredMessage(done,
 			logs.SteadyStream(done, 1, logs.Messages(done)),
 		),
 	)
 
-	source2 := transformers.Add(done, "source", 2,
+	source2 := transformers.Add(done, cb2,
 		transformers.StructuredMessage(done,
 			logs.SlowStream(done, logs.Messages(done)),
 		),
@@ -31,4 +32,14 @@ func main() {
 	combined := mixers.Combine(done, source1, source2)
 	<-consumers.Structured(done, combined)
 	fmt.Println("All Done")
+}
+
+func cb1(m types.StructuredMessage) types.StructuredMessage {
+	m["source"] = 1
+	return m
+}
+
+func cb2(m types.StructuredMessage) types.StructuredMessage {
+	m["source"] = 2
+	return m
 }
