@@ -14,7 +14,7 @@ import (
 
 const broker = "localhost:9092"
 const topic = "demo_topic"
-const keyToAdd = "foo"
+const keyToMutate = "foo"
 
 func main() {
 	fmt.Println("Starting")
@@ -23,7 +23,7 @@ func main() {
 
 	go func() {
 		<-consumers.Structured(done,
-			search(done, keyToAdd, rand.SeededRand.Int()%10,
+			search(done, keyToMutate, rand.SeededRand.Int()%10,
 				sources.Kafka(done, broker, topic, "search_demo"),
 			),
 		)
@@ -31,7 +31,7 @@ func main() {
 
 	// BLOCKING: Generate random log messages and write them to kafka
 	outputs.Kafka(done, broker, topic,
-		transformers.Add(done, addRandomField,
+		transformers.Mutate(done, MutateRandomField,
 			transformers.LogHash(done, "logHash",
 				transformers.StructuredMessage(done,
 					logGenerator.SteadyStream(done, 2, logGenerator.Messages(done)),
@@ -41,8 +41,8 @@ func main() {
 	)
 }
 
-func addRandomField(m types.StructuredMessage) types.StructuredMessage {
-	m[keyToAdd] = rand.SeededRand.Int() % 10
+func MutateRandomField(m types.StructuredMessage) types.StructuredMessage {
+	m[keyToMutate] = rand.SeededRand.Int() % 10
 	return m
 }
 

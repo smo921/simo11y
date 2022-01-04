@@ -101,7 +101,7 @@ func withDecorator(d decorator) func(*logger) {
 	}
 }
 
-// Random log returns a random structured message including fields added by the
+// Random log returns a random structured message including fields Mutateed by the
 // decorators configured in the logger (`l`)
 func (l *logger) RandomLog() types.StructuredMessage {
 	log := newLog()

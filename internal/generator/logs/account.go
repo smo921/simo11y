@@ -17,7 +17,7 @@ type AccountLogger struct {
 	accounts []account
 }
 
-// newAccountLogger initializes random account data to be added to log messages
+// newAccountLogger initializes random account data to be Mutateed to log messages
 func newAccountLogger(num int) *AccountLogger {
 	al := &AccountLogger{}
 	al.accounts = make([]account, num)
@@ -40,7 +40,7 @@ func (al AccountLogger) randomAccount() account {
 	return al.accounts[rand.SeededRand.Int()%len(al.accounts)]
 }
 
-// Decorator adds account details to a structured message
+// Decorator Mutates account details to a structured message
 func (al AccountLogger) Decorator(msg types.StructuredMessage) types.StructuredMessage {
 	account := al.randomAccount()
 	msg["account"] = make(types.StructuredMessage)

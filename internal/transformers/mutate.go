@@ -2,9 +2,7 @@ package transformers
 
 import "ar/internal/types"
 
-type Callback func(types.StructuredMessage) types.StructuredMessage
-
-func Add(done chan string, cb Callback, in <-chan types.StructuredMessage) <-chan types.StructuredMessage {
+func Mutate(done chan string, cb types.Callback, in <-chan types.StructuredMessage) <-chan types.StructuredMessage {
 	out := make(chan types.StructuredMessage)
 	go func() {
 		defer close(out)

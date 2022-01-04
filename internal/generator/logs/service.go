@@ -38,7 +38,7 @@ func (sl ServiceLogger) Dump() string {
 	return ret
 }
 
-// Decorator adds service details to a structured message
+// Decorator Mutates service details to a structured message
 func (sl ServiceLogger) Decorator(msg types.StructuredMessage) types.StructuredMessage {
 	service := sl.randomService()
 	msg["service"] = service.name

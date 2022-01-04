@@ -19,12 +19,12 @@ type metricFactory struct {
 }
 
 // Generate a stream of random metrics
-func MetricStream(done chan string, addr string) <-chan string {
+func MetricStream(done chan string, Mutater string) <-chan string {
 	out := make(chan string)
 	go func() {
 		defer close(out)
 
-		statsd, err := statsd.New(addr)
+		statsd, err := statsd.New(Mutater)
 		if err != nil {
 			log.Fatal(err)
 		}
