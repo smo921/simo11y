@@ -4,8 +4,10 @@ import "fmt"
 import "ar/internal/types"
 
 // Basic consumer of messages from a channel
-func Basic(done <-chan string, in <-chan types.Message) {
+func Message(done <-chan string, in <-chan types.Message) <-chan types.Message {
+	out := make(chan types.Message)
 	go func() {
+		defer close(out)
 		for {
 			select {
 			case <-done:
@@ -18,11 +20,12 @@ func Basic(done <-chan string, in <-chan types.Message) {
 			}
 		}
 	}()
+	return out
 }
 
 // Basic consumer that uses structured messages
-func Structured(done <-chan string, in <-chan types.StructuredMessage) <-chan string {
-	out := make(chan string)
+func StructuredMessage(done <-chan string, in <-chan types.StructuredMessage) <-chan types.StructuredMessage {
+	out := make(chan types.StructuredMessage)
 	go func() {
 		defer close(out)
 		for {

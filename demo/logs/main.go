@@ -16,7 +16,7 @@ func main() {
 	done := make(chan string)
 	defer close(done)
 
-	<-consumers.Structured(done,
+	<-consumers.StructuredMessage(done,
 		filters.Take(done, numMessages,
 			consumers.Processor(done, transformers.LogHash,
 				transformers.StructuredMessage(done,

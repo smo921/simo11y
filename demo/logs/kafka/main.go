@@ -21,7 +21,7 @@ func main() {
 	defer close(done)
 
 	outputs.Kafka(done, broker, topic, filters.Take(done, numMessages,
-		transformers.LogHash(done, "logHash",
+		consumers.Processor(done, transformers.LogHash,
 			transformers.StructuredMessage(done,
 				logGenerator.SteadyStream(done, 2, logGenerator.Messages(done)),
 			),
@@ -30,7 +30,7 @@ func main() {
 
 	fmt.Println("Done sending messages to Kafka")
 
-	<-consumers.Structured(done, sources.Kafka(done, broker, topic, "demo"))
+	<-consumers.StructuredMessage(done, sources.Kafka(done, broker, topic, "demo"))
 
 	fmt.Println("All Done")
 }

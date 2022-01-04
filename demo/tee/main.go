@@ -19,8 +19,8 @@ func main() {
 	source := transformers.StructuredMessage(done, logs.SteadyStream(done, 1, logs.Messages(done)))
 	source = filters.Take(done, numMessages, source)
 	ch1, ch2 := mixers.Tee(done, source)
-	c1 := consumers.Structured(done, ch1)
-	c2 := consumers.Structured(done, ch2)
+	c1 := consumers.StructuredMessage(done, ch1)
+	c2 := consumers.StructuredMessage(done, ch2)
 	<-c1
 	<-c2
 	fmt.Println("All Done")

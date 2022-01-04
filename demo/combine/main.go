@@ -30,7 +30,7 @@ func main() {
 	)
 
 	combined := mixers.Combine(done, source1, source2)
-	<-consumers.Structured(done, combined)
+	<-consumers.StructuredMessage(done, combined)
 	fmt.Println("All Done")
 }
 

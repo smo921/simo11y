@@ -22,7 +22,7 @@ func main() {
 	defer close(done)
 
 	go func() {
-		<-consumers.Structured(done,
+		<-consumers.StructuredMessage(done,
 			search(done, keyToMutate, rand.SeededRand.Int()%10,
 				sources.Kafka(done, broker, topic, "search_demo"),
 			),
