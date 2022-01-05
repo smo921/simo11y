@@ -10,11 +10,12 @@ import (
 	"ar/internal/types"
 )
 
+const src = "127.0.0.1:12345"
+const dest = "127.0.0.1:23456"
+
 func main() {
 	done := make(chan string)
 	defer close(done)
-	src := fmt.Sprintf("127.0.0.1:%d", 12345)
-	dest := fmt.Sprintf("127.0.0.1:%d", 23456)
 	forwarder(done, dest, sources.Metrics(done, src))
 	r := sources.Metrics(done, dest)
 

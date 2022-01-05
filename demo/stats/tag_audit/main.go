@@ -8,11 +8,12 @@ import (
 	"ar/internal/watchdogs"
 )
 
+const src = "127.0.0.1:12345"
+
 func main() {
 	fmt.Println("Starting Tag Audit")
 	done := make(chan string)
 	defer close(done)
-	src := fmt.Sprintf("127.0.0.1:%d", 12345)
 
 	r := sources.Metrics(done, src)
 
