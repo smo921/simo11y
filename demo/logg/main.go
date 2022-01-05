@@ -3,10 +3,10 @@ package main
 import "fmt"
 
 import (
-	"ar/internal/consumers"
 	logGenerator "ar/internal/generator/logs"
 	"ar/internal/generator/rand"
 	"ar/internal/outputs"
+	"ar/internal/processors"
 	"ar/internal/sources"
 	"ar/internal/transformers"
 	"ar/internal/types"
@@ -22,17 +22,18 @@ func main() {
 	defer close(done)
 
 	go func() {
-		<-consumers.StructuredMessage(done,
-			search(done, keyToMutate, rand.SeededRand.Int()%10,
-				sources.Kafka(done, broker, topic, "search_demo"),
-			),
+		messages := search(done, keyToMutate, rand.SeededRand.Int()%10,
+			sources.Kafka(done, broker, topic, "search_demo"),
 		)
+		for m := range messages {
+			fmt.Println(m)
+		}
 	}()
 
 	// BLOCKING: Generate random log messages and write them to kafka
 	outputs.Kafka(done, broker, topic,
-		consumers.Processor(done, MutateRandomField,
-			consumers.Processor(done, transformers.LogHash,
+		processors.StructuredMessage(done, MutateRandomField,
+			processors.StructuredMessage(done, transformers.LogHash,
 				transformers.StructuredMessage(done,
 					logGenerator.SteadyStream(done, 2, logGenerator.Messages(done)),
 				),

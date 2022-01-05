@@ -3,9 +3,9 @@ package main
 import (
 	"fmt"
 
-	"ar/internal/consumers"
 	"ar/internal/filters"
 	logGenerator "ar/internal/generator/logs"
+	"ar/internal/processors"
 	"ar/internal/transformers"
 )
 
@@ -16,14 +16,16 @@ func main() {
 	done := make(chan string)
 	defer close(done)
 
-	<-consumers.StructuredMessage(done,
-		filters.Take(done, numMessages,
-			consumers.Processor(done, transformers.LogHash,
-				transformers.StructuredMessage(done,
-					logGenerator.SteadyStream(done, 2, logGenerator.Messages(done)),
-				),
+	messages := filters.Take(done, numMessages,
+		processors.StructuredMessage(done, transformers.LogHash,
+			transformers.StructuredMessage(done,
+				logGenerator.SteadyStream(done, 2, logGenerator.Messages(done)),
 			),
 		),
 	)
+
+	for m := range messages {
+		fmt.Println(m)
+	}
 	fmt.Println("All Done")
 }
