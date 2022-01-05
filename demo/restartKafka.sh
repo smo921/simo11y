@@ -25,7 +25,7 @@ KAFKA_PID=$!
 sleep 5 # NOTE: may need to increase sleep time if topic admin commands fail intermittently.
 echo "Kafka started . . ."
 
-trap "{ echo 'sigquit received' ; kill -9 $KAFKA_PID ; kill -9 $ZOOKEEPER_PID ; echo 'Zookeeper and Kafka terminated.'; }" QUIT
+trap "{ echo 'sigquit received' ; kill -9 $KAFKA_PID ; kill -9 $ZOOKEEPER_PID ; echo 'Zookeeper and Kafka terminated.'; rm -f demo.log.* ; }" QUIT
 
 # Delete and create `demo_topic`:
 kafka-topics --bootstrap-server ${BROKER} --topic ${TOPIC} --delete > /dev/null 2>&1
