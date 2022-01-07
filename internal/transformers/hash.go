@@ -5,7 +5,7 @@ import (
 	"fmt"
 	"sort"
 
-	"ar/internal/types"
+	"simo11y/internal/types"
 )
 
 // LogHash calculates a unique hash based on the structure of a log message

@@ -1,6 +1,6 @@
 package mixers
 
-import "ar/internal/types"
+import "simo11y/internal/types"
 
 func Tee(done chan string, in <-chan types.StructuredMessage) (_, _ <-chan types.StructuredMessage) {
 	ch1 := make(chan types.StructuredMessage)

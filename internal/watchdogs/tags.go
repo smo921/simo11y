@@ -1,7 +1,7 @@
 package watchdogs
 
 import (
-	"ar/internal/types"
+	"simo11y/internal/types"
 	"fmt"
 	"strings"
 )

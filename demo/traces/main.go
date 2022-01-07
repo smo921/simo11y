@@ -9,7 +9,7 @@ import (
 	"gopkg.in/DataDog/dd-trace-go.v1/ddtrace/ext"
 	"gopkg.in/DataDog/dd-trace-go.v1/ddtrace/tracer"
 
-	"ar/internal/sources"
+	"simo11y/internal/sources"
 )
 
 const tracePort = "localhost:8126"

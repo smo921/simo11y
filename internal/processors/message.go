@@ -1,7 +1,7 @@
 package processors
 
 import (
-	"ar/internal/types"
+	"simo11y/internal/types"
 )
 
 // Basic consumer of messages from a channel

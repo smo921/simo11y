@@ -6,7 +6,7 @@ import (
 
 	"github.com/confluentinc/confluent-kafka-go/kafka"
 
-	"ar/internal/types"
+	"simo11y/internal/types"
 )
 
 // KafkaConfig stores configuration details

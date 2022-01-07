@@ -7,7 +7,7 @@ import (
 
 	"github.com/DataDog/datadog-go/v5/statsd"
 
-	"ar/internal/generator/rand"
+	"simo11y/internal/generator/rand"
 )
 
 type metricDefinition struct {

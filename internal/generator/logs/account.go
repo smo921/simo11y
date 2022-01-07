@@ -3,8 +3,8 @@ package logs
 import (
 	"fmt"
 
-	"ar/internal/generator/rand"
-	"ar/internal/types"
+	"simo11y/internal/generator/rand"
+	"simo11y/internal/types"
 )
 
 type account struct {

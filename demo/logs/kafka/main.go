@@ -3,12 +3,12 @@ package main
 import (
 	"fmt"
 
-	"ar/internal/filters"
-	logGenerator "ar/internal/generator/logs"
-	"ar/internal/outputs"
-	"ar/internal/processors"
-	"ar/internal/sources"
-	"ar/internal/transformers"
+	"simo11y/internal/filters"
+	logGenerator "simo11y/internal/generator/logs"
+	"simo11y/internal/outputs"
+	"simo11y/internal/processors"
+	"simo11y/internal/sources"
+	"simo11y/internal/transformers"
 )
 
 const numMessages = 20

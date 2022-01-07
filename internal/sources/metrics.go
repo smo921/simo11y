@@ -6,7 +6,7 @@ import (
 	"net"
 	"strings"
 
-	"ar/internal/types"
+	"simo11y/internal/types"
 )
 
 const maxBufferSize = 1024

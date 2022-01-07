@@ -1,6 +1,6 @@
 package filters
 
-import "ar/internal/types"
+import "simo11y/internal/types"
 
 // Take the first 'limit' values from 'in' channel and write to returned 'out' channel
 func Take(done chan string, limit int, in <-chan types.StructuredMessage) <-chan types.StructuredMessage {

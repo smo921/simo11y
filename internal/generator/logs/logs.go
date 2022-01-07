@@ -1,8 +1,8 @@
 package logs
 
 import (
-	"ar/internal/generator/rand"
-	"ar/internal/types"
+	"simo11y/internal/generator/rand"
+	"simo11y/internal/types"
 	"encoding/json"
 	"fmt"
 	"time"

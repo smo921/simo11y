@@ -3,13 +3,13 @@ package main
 import "fmt"
 
 import (
-	logGenerator "ar/internal/generator/logs"
-	"ar/internal/generator/rand"
-	"ar/internal/outputs"
-	"ar/internal/processors"
-	"ar/internal/sources"
-	"ar/internal/transformers"
-	"ar/internal/types"
+	logGenerator "simo11y/internal/generator/logs"
+	"simo11y/internal/generator/rand"
+	"simo11y/internal/outputs"
+	"simo11y/internal/processors"
+	"simo11y/internal/sources"
+	"simo11y/internal/transformers"
+	"simo11y/internal/types"
 )
 
 const broker = "localhost:9092"

@@ -1,6 +1,6 @@
 package mixers
 
-import "ar/internal/types"
+import "simo11y/internal/types"
 
 // TODO; handle case of closed in1/in2 channels
 

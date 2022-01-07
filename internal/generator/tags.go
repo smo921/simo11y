@@ -1,7 +1,7 @@
 package generator
 
 import "fmt"
-import "ar/internal/generator/rand"
+import "simo11y/internal/generator/rand"
 
 // generate random account and instance key:value "tags"
 func randomTags() []string {

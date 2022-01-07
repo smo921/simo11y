@@ -1,7 +1,7 @@
 package sources
 
 import (
-	"ar/internal/types"
+	"simo11y/internal/types"
 	"encoding/json"
 	"fmt"
 	"os"

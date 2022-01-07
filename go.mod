@@ -1,4 +1,4 @@
-module ar
+module simo11y
 
 go 1.16
 

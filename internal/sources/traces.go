@@ -9,7 +9,7 @@ import (
 
 	"github.com/ugorji/go/codec"
 
-	"ar/internal/types"
+	"simo11y/internal/types"
 )
 
 // reads metrcis from addr and sends to returned channel

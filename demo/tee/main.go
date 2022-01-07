@@ -3,11 +3,11 @@ package main
 import (
 	"fmt"
 
-	"ar/internal/consumers"
-	"ar/internal/filters"
-	"ar/internal/generator/logs"
-	"ar/internal/mixers"
-	"ar/internal/transformers"
+	"simo11y/internal/consumers"
+	"simo11y/internal/filters"
+	"simo11y/internal/generator/logs"
+	"simo11y/internal/mixers"
+	"simo11y/internal/transformers"
 )
 
 const numMessages = 3

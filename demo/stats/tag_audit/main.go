@@ -3,9 +3,9 @@ package main
 import (
 	"fmt"
 
-	"ar/internal/generator"
-	"ar/internal/sources"
-	"ar/internal/watchdogs"
+	"simo11y/internal/generator"
+	"simo11y/internal/sources"
+	"simo11y/internal/watchdogs"
 )
 
 const src = "127.0.0.1:12345"
