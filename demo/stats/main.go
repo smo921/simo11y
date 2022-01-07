@@ -17,11 +17,11 @@ func main() {
 	done := make(chan string)
 	defer close(done)
 	forwarder(done, dest, sources.Metrics(done, src))
-	r := sources.Metrics(done, dest)
+	metrics := sources.Metrics(done, dest)
 
 	generator.MetricStream(done, src)
-	for m := range r {
-		fmt.Println(m)
+	for metric := range metrics {
+		fmt.Println(metric)
 	}
 }
 
