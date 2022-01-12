@@ -1,10 +1,10 @@
 package logs
 
 import (
-	"simo11y/internal/generator/rand"
-	"simo11y/internal/types"
 	"encoding/json"
 	"fmt"
+	"simo11y/internal/generator/rand"
+	"simo11y/internal/types"
 	"time"
 )
 
@@ -115,9 +115,9 @@ func (l *logger) RandomLog() types.StructuredMessage {
 // The messages are decorated with account and service details.
 func Messages(done chan string) <-chan string {
 	accounts := newAccountLogger(numAccounts)
-	fmt.Println(accounts.Dump())
+	fmt.Println(accounts.String())
 	services := newServiceLogger(numServices)
-	fmt.Println(services.Dump())
+	fmt.Println(services.String())
 
 	l := newLogger(
 		withDecorator(accounts.Decorator),

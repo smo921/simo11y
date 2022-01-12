@@ -1,9 +1,9 @@
 package logs
 
 import (
+	"fmt"
 	"simo11y/internal/generator/rand"
 	"simo11y/internal/types"
-	"fmt"
 )
 
 type service struct {
@@ -29,7 +29,7 @@ func newServiceLogger(num int) *ServiceLogger {
 }
 
 // Dump returns the service logger runtime details as a string
-func (sl ServiceLogger) Dump() string {
+func (sl ServiceLogger) String() string {
 	ret := fmt.Sprintf("Service Logger: %d services\n", len(sl.services))
 	for i := range sl.services {
 		s := sl.services[i]
