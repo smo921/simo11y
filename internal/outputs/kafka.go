@@ -3,6 +3,7 @@ package outputs
 import (
 	"fmt"
 	"os"
+	"strconv"
 
 	"github.com/confluentinc/confluent-kafka-go/kafka"
 
@@ -13,7 +14,7 @@ import (
 type KafkaConfig struct{}
 
 // Kafka sync reads from the in channel and writes messages to the configured brokers/topics
-func Kafka(done chan string, broker, topic string, in <-chan types.StructuredMessage) {
+func Kafka(done chan string, broker, topic, keyField string, in <-chan types.StructuredMessage) {
 	// setup kafka client
 	p, err := kafka.NewProducer(&kafka.ConfigMap{"bootstrap.servers": broker})
 
@@ -29,15 +30,24 @@ func Kafka(done chan string, broker, topic string, in <-chan types.StructuredMes
 	for {
 		select {
 		case <-done:
-			fmt.Printf("Kafka sync finished.")
+			fmt.Println("Kafka sync finished.")
 			return
 		case msg, ok := <-in:
 			if !ok {
 				return
 			}
+
+			// extract kafka message key
+			key, err := kafkaKey(msg, keyField)
+			if err != nil {
+				fmt.Println("ERROR extracting message key:", err)
+				key = nil
+			}
+
 			// write message to kafka
 			err = p.Produce(&kafka.Message{
 				TopicPartition: kafka.TopicPartition{Topic: &topic, Partition: kafka.PartitionAny},
+				Key:            key,
 				Value:          msg.Raw(),
 				Headers:        []kafka.Header{},
 			}, deliveryChan)
@@ -54,4 +64,24 @@ func Kafka(done chan string, broker, topic string, in <-chan types.StructuredMes
 			}
 		}
 	}
+}
+
+func kafkaKey(m types.StructuredMessage, keyField string) ([]byte, error) {
+	var key []byte
+	k, err := m.Fetch(keyField)
+	if err != nil {
+		return nil, err
+	}
+	switch v := k.(type) {
+	case int:
+		key = []byte(strconv.Itoa(int(v)))
+	case string:
+		key = []byte(v)
+	case float64:
+		key = []byte(strconv.Itoa(int(float64(v))))
+	default:
+		return nil, fmt.Errorf("error converting keyField '%s'", keyField)
+	}
+
+	return key, nil
 }

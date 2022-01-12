@@ -1,10 +1,10 @@
 package sources
 
 import (
-	"simo11y/internal/types"
 	"encoding/json"
 	"fmt"
 	"os"
+	"simo11y/internal/types"
 
 	"github.com/confluentinc/confluent-kafka-go/kafka"
 )

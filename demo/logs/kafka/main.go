@@ -20,7 +20,7 @@ func main() {
 	done := make(chan string)
 	defer close(done)
 
-	outputs.Kafka(done, broker, topic, filters.Take(done, numMessages,
+	outputs.Kafka(done, broker, topic, "account.id", filters.Take(done, numMessages,
 		processors.StructuredMessage(done, transformers.LogHash,
 			transformers.StructuredMessage(done,
 				logGenerator.SteadyStream(done, 2, logGenerator.Messages(done)),
@@ -30,7 +30,7 @@ func main() {
 
 	fmt.Println("Done sending messages to Kafka")
 	for m := range sources.Kafka(done, broker, topic, "demo") {
-		fmt.Println(m)
+		fmt.Println(m["account"])
 	}
 	fmt.Println("All Done")
 }
