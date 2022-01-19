@@ -9,6 +9,7 @@ import (
 	"simo11y/internal/processors"
 	"simo11y/internal/sources"
 	"simo11y/internal/transformers"
+	"simo11y/internal/types"
 )
 
 const numMessages = 20
@@ -20,7 +21,13 @@ func main() {
 	done := make(chan string)
 	defer close(done)
 
-	outputs.Kafka(done, broker, topic, "account.id", filters.Take(done, numMessages,
+	kconf := types.KafkaConfig{
+		Broker:   broker,
+		Topic:    topic,
+		KeyField: "account.id",
+	}
+
+	outputs.Kafka(done, kconf, filters.Take(done, numMessages,
 		processors.StructuredMessage(done, transformers.LogHash,
 			transformers.StructuredMessage(done,
 				logGenerator.SteadyStream(done, 2, logGenerator.Messages(done)),
@@ -29,7 +36,7 @@ func main() {
 	))
 
 	fmt.Println("Done sending messages to Kafka")
-	for m := range sources.Kafka(done, broker, topic, "demo") {
+	for m := range sources.Kafka(done, kconf) {
 		fmt.Println(m["account"])
 	}
 	fmt.Println("All Done")

@@ -21,9 +21,14 @@ func main() {
 	done := make(chan string)
 	defer close(done)
 
+	kconf := types.KafkaConfig{
+		Broker: broker,
+		Topic:  topic,
+	}
+
 	go func() {
 		messages := search(done, keyToMutate, rand.SeededRand.Int()%10,
-			sources.Kafka(done, broker, topic, "search_demo"),
+			sources.Kafka(done, kconf),
 		)
 		for m := range messages {
 			fmt.Println(m)
@@ -31,7 +36,7 @@ func main() {
 	}()
 
 	// BLOCKING: Generate random log messages and write them to kafka
-	outputs.Kafka(done, broker, topic,
+	outputs.Kafka(done, kconf,
 		processors.StructuredMessage(done, MutateRandomField,
 			processors.StructuredMessage(done, transformers.LogHash,
 				transformers.StructuredMessage(done,

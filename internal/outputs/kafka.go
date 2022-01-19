@@ -10,13 +10,10 @@ import (
 	"simo11y/internal/types"
 )
 
-// KafkaConfig stores configuration details
-type KafkaConfig struct{}
-
 // Kafka sync reads from the in channel and writes messages to the configured brokers/topics
-func Kafka(done chan string, broker, topic, keyField string, in <-chan types.StructuredMessage) {
+func Kafka(done chan string, config types.KafkaConfig, in <-chan types.StructuredMessage) {
 	// setup kafka client
-	p, err := kafka.NewProducer(&kafka.ConfigMap{"bootstrap.servers": broker})
+	p, err := kafka.NewProducer(&kafka.ConfigMap{"bootstrap.servers": config.Broker})
 
 	if err != nil {
 		fmt.Printf("Failed to create producer: %s\n", err)
@@ -38,7 +35,7 @@ func Kafka(done chan string, broker, topic, keyField string, in <-chan types.Str
 			}
 
 			// extract kafka message key
-			key, err := kafkaKey(msg, keyField)
+			key, err := kafkaKey(msg, config.KeyField)
 			if err != nil {
 				fmt.Println("ERROR extracting message key:", err)
 				key = nil
@@ -46,7 +43,7 @@ func Kafka(done chan string, broker, topic, keyField string, in <-chan types.Str
 
 			// write message to kafka
 			err = p.Produce(&kafka.Message{
-				TopicPartition: kafka.TopicPartition{Topic: &topic, Partition: kafka.PartitionAny},
+				TopicPartition: kafka.TopicPartition{Topic: &config.Topic, Partition: kafka.PartitionAny},
 				Key:            key,
 				Value:          msg.Raw(),
 				Headers:        []kafka.Header{},

@@ -9,12 +9,12 @@ import (
 	"github.com/confluentinc/confluent-kafka-go/kafka"
 )
 
-func Kafka(done chan string, broker, topic, consumerGroup string) <-chan types.StructuredMessage {
+func Kafka(done chan string, config types.KafkaConfig) <-chan types.StructuredMessage {
 	out := make(chan types.StructuredMessage)
 
 	consumer, err := kafka.NewConsumer(&kafka.ConfigMap{
-		"bootstrap.servers": broker,
-		"group.id":          consumerGroup,
+		"bootstrap.servers": config.Broker,
+		"group.id":          config.ConsumerGroup,
 		"auto.offset.reset": "beginning",
 	})
 
@@ -23,7 +23,7 @@ func Kafka(done chan string, broker, topic, consumerGroup string) <-chan types.S
 		os.Exit(1)
 	}
 
-	consumer.Subscribe(topic, nil)
+	consumer.Subscribe(config.Topic, nil)
 
 	go func() {
 		defer close(out)
