@@ -2,8 +2,18 @@ package types
 
 import "fmt"
 
-// TODO: Try to replace with datadog agent Span struct
+// Data structures are taken from the datadog agent trace and span code
+//
 // https://github.com/DataDog/datadog-agent/blob/main/pkg/trace/pb/span.proto
+// https://github.com/DataDog/datadog-agent/blob/main/pkg/trace/pb/trace.go
+//
+// TODO: Try to replace with datadog agent Span struct
+
+// Trace is a collection of spans with the same trace ID
+type Trace []*Span
+
+// Traces is a list of traces. This model matters as this is what we unpack from msgp.
+type Traces []Trace
 
 // Span from the datadog tracer library
 type Span struct {
@@ -21,7 +31,8 @@ type Span struct {
 	Type     string             `codec:"type"`
 }
 
-func (s Span) ToString() string {
+// String formats a span nicely as a string
+func (s Span) String() string {
 	str := fmt.Sprintf("Name: %s\n", s.Name)
 	str += fmt.Sprintf("Service: %s\n", s.Service)
 	str += fmt.Sprintf("Resource: %s\n", s.Resource)

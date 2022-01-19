@@ -36,23 +36,22 @@ func main() {
 
 func makeTraces() {
 	urls := []string{
+		"http://localhost:6060", // local godoc web server - `godoc -http=:6060`
 		"https://www.google.com/",
 		"https://en.wikipedia.org/wiki/Main_Page",
 		"https://www.reddit.com/",
 		"https://duckduckgo.com/",
 	}
 	for {
-		fmt.Println("Making span")
-		span := tracer.StartSpan("get.data")
-
-		// Perform an operation.
 		//for i := range urls {
-		i := 1
-		_, err := http.Get(urls[i])
-		fmt.Println("http.GET", urls[i])
-		// Create a child of it, computing the time needed to read a file.
-		child := tracer.StartSpan(urls[i], tracer.ChildOf(span.Context()))
-		child.SetTag(ext.ResourceName, urls[i])
+		i := 0
+		url := urls[i]
+		span := tracer.StartSpan(fmt.Sprintf("get.%s", url))
+
+		// Create a child of it, computing the time needed to fetch a url.
+		child := tracer.StartSpan(url, tracer.ChildOf(span.Context()))
+		_, err := http.Get(url)
+		child.SetTag(ext.ResourceName, url)
 
 		// We may finish the child span using the returned error. If it's
 		// nil, it will be disregarded.
@@ -64,7 +63,6 @@ func makeTraces() {
 		//}
 
 		span.Finish()
-
 		time.Sleep(5 * time.Second)
 	}
 }

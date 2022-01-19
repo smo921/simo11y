@@ -17,12 +17,12 @@ func (m StructuredMessage) Fetch(path string) (interface{}, error) {
 		if numSteps > 1 {
 			v, ok := location[step].(map[string]interface{})
 			if !ok {
-				return nil, fmt.Errorf("unable to traverse path '%s'", path)
+				return nil, fmt.Errorf("unable to traverse path '%s', failed on step '%s'", path, step)
 			}
 			numSteps--
 			location = v
 		} else {
-			return location[step].(interface{}), nil
+			return location[step], nil
 		}
 	}
 	return nil, nil

@@ -21,8 +21,8 @@ func Traces(done chan string, addr string) <-chan string {
 		srv := &http.Server{Addr: addr, Handler: http.HandlerFunc(handle)}
 		log.Printf("Serving on https://%s", addr)
 		log.Fatal(srv.ListenAndServe())
-
 	}()
+
 	return traceStream
 }
 
@@ -45,10 +45,10 @@ func handle(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	var spans [][]types.Span
+	var traces types.Traces
 	var h codec.Handle = new(codec.MsgpackHandle)
 	var dec *codec.Decoder = codec.NewDecoderBytes(contents, h)
-	err = dec.Decode(&spans)
+	err = dec.Decode(&traces)
 	if err != nil {
 		log.Fatalf("Oops! Failed unmarshalling msgpack.\n %s", err)
 		http.Error(w, err.Error(), 500)
@@ -56,9 +56,9 @@ func handle(w http.ResponseWriter, r *http.Request) {
 
 	w.WriteHeader(http.StatusOK)
 
-	for spanNum, span := range spans {
-		for traceNum, trace := range span {
-			fmt.Printf("Span %d - Trace: %d:\n%s\n", spanNum, traceNum, trace.ToString())
+	for traceNum, trace := range traces {
+		for spanNum, span := range trace {
+			fmt.Printf("Span %d - Trace: %d:\n%s\n", spanNum, traceNum, span.String())
 		}
 	}
 }
