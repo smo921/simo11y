@@ -6,8 +6,10 @@ import (
 	"strings"
 )
 
+type CompressedMessages []byte
 type Message string
 type StructuredMessage map[string]interface{}
+type StructuredMessages []StructuredMessage
 
 func (m StructuredMessage) Fetch(path string) (interface{}, error) {
 	steps := strings.Split(path, ".")
@@ -31,7 +33,27 @@ func (m StructuredMessage) Fetch(path string) (interface{}, error) {
 func (m StructuredMessage) Raw() []byte {
 	rawLog, err := json.Marshal(m)
 	if err != nil {
+		// TODO: return error
 		fmt.Printf("Error converting structured message to byte array: %s", err)
 	}
 	return rawLog
+}
+
+func (m StructuredMessage) Size() int {
+	return len(m.Raw())
+}
+
+func (m StructuredMessages) Raw() []byte {
+	rawLog, err := json.Marshal(m)
+	if err != nil {
+		// TODO: return error
+		fmt.Printf("Error converting structured message to byte array: %s", err)
+	}
+	return rawLog
+}
+
+func ReadStructuredMessages(data []byte) (*StructuredMessages, error) {
+	msgs := &StructuredMessages{}
+	err := json.Unmarshal(data, msgs)
+	return msgs, err
 }
