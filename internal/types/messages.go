@@ -30,6 +30,7 @@ func (m StructuredMessage) Fetch(path string) (interface{}, error) {
 	return nil, nil
 }
 
+// Raw returns the byte array of a single StructureMessage
 func (m StructuredMessage) Raw() []byte {
 	rawLog, err := json.Marshal(m)
 	if err != nil {
@@ -43,6 +44,7 @@ func (m StructuredMessage) Size() int {
 	return len(m.Raw())
 }
 
+// Raw returns the byte array of the StructureMessages
 func (m StructuredMessages) Raw() []byte {
 	rawLog, err := json.Marshal(m)
 	if err != nil {
